@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kanye West Soundwave Animation</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/addons/p5.sound.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+<script>
+let soundwaveRadius = 0;
+let spiralAngle = 0;
+let clickCount = 0;
+let img;
+let imgSize = 50;
+let imgAngle = 0;
+let imgScale = 1;
+let animationType = 'normal';
+let animationTransition = 0;
+let targetAnimationType = 'normal';
+let sound;
+let isPlaying = false;
+let playButton = null;
+let displayedQuotes = [];
+let lastQuoteTime = 0;
+let mandalas = [];
+
+const quotes = [
+    "2024",
+    "All you have to be is yourself",
+    "Believe in your flyness...conquer your shyness.",
+    "Burn that excel spread sheet",
+    "Decentralize",
+    "Distraction is the enemy of vision",
+    "Everything you do in life stems from either fear or love",
+    "For me giving up is way harder than trying.",
+    "For me, money is not my definition of success. Inspiring people is a definition of success",
+    "Fur pillows are hard to actually sleep on",
+    "George Bush doesn't care about black people",
+    "Have you ever thought you were in love with someone but then realized you were just staring in a mirror for 20 minutes?",
+    "I care. I care about everything. Sometimes not giving a f#%k is caring the most.",
+    "I feel calm but energized",
+    "I feel like I'm too busy writing history to read it.",
+    "I feel like me and Taylor might still have sex",
+    "I give up drinking every week",
+    "I leave my emojis bart Simpson color",
+    "I love sleep; it's my favorite.",
+    "I make awesome decisions in bike stores!!!",
+    "I really love my Tesla. I'm in the future. Thank you Elon.",
+    "I still think I am the greatest.",
+    "I think I do myself a disservice by comparing myself to Steve Jobs and Walt Disney and human beings that we've seen before. It should be more like Willy Wonka...and welcome to my chocolate factory.",
+    "I want the world to be better! All I want is positive! All I want is dopeness!",
+    "I wish I had a friend like me",
+    "I'd like to meet with Tim Cook. I got some ideas",
+    "I'll say things that are serious and put them in a joke form so people can enjoy them. We laugh to keep from crying.",
+    "I'm a creative genius",
+    "I'm nice at ping pong",
+    "I'm the best",
+    "If I don't scream, if I don't say something then no one's going to say anything.",
+    "If I got any cooler I would freeze to death",
+    "If you have the opportunity to play this game of life you need to appreciate every moment. a lot of people don't appreciate the moment until it's passed.",
+    "Just stop lying about shit. Just stop lying.",
+    "Keep squares out yo circle",
+    "Keep your nose out the sky, keep your heart to god, and keep your face to the rising sun.",
+    "Let's be like water",
+    "Man... whatever happened to my antique fish tank?",
+    "My dad got me a drone for Christmas",
+    "My greatest award is what I'm about to do.",
+    "My greatest pain in life is that I will never be able to see myself perform live.",
+    "One day I'm gon' marry a porn star",
+    "One of my favorite of many things about what the Trump hat represents to me is that people can't tell me what to do because I'm black",
+    "Only free thinkers",
+    "People always say that you can't please everybody. I think that's a cop-out. Why not attempt it? Cause think of all the people that you will please if you try.",
+    "People always tell you 'Be humble. Be humble.' When was the last time someone told you to be amazing? Be great! Be awesome! Be awesome!",
+    "People only get jealous.",
+    "Perhaps you have been more like water today",
+    "Pulling up in the may bike",
+    "Shut the fuck up I will fucking laser you with alien fucking eyes and explode your",
+    "Sometimes you saying the closing button on people running towards the elevator.",
+    "Sometimes you need to get rid of everything",
+    "Style is genderless",
+    "The thought police want your thoughts suppressed",
+    "The world is our family",
+    "The world is our office",
+    "Today is the best day ever and ever and ever",
+    "Truth is my goal. Controversy is my gym.",
+    "Tweeting is legal and also therapeutic",
+    "We all self-conscious.",
+    "We came into a world. And we're fixing it up.",
+    "You can't look at a glass half full or empty if it's overflowing.",
+    "I hate when I'm on a flight and I wake up with a water bottle next to me like oh great now I gotta be responsible for this water bottle",
+    "All the musicians will be free",
+    "Artists are founders",
+    "Buy property",
+    "Culture is the most powerful force in humanity",
+    "Empathy is the glue",
+    "I am one of the most famous people on the planet",
+    "I am running for President of the United States",
+    "I am the head of Adidas. I will bring Adidas and Puma back together and bring me and jay back together",
+    "I am Warhol. I am the No. 1 most impactful artist.",
+    "I channel Will Ferrell when I'm at the daddy dances",
+    "I don't wanna see no woke tweets or hear no woke raps ... it's show time ... it's a whole different energy right now",
+    "I hear people say this person is cool and this person is not cool. People are cool. Man has never invented anything as awesome as a an actual person but sometimes we value the objects we create over life itself",
+    "I honestly need all my Royeres to be museum quality... if I see a fake Royere Ima have to Rick James your couch",
+    "I love UZI. I be saying the same thing about Steve Jobs. I be feeling just like UZI",
+    "I need an army of angels to cover me while I pull this sword out of the stone",
+    "I spoke to Dave Chapelle for two hours this morning. He is our modern day Socrates",
+    "I was just speaking with someone that told me their life story and they used to be homeless.",
+    "I watch Bladerunner on repeat",
+    "I'm giving all Good music artists back the 50% share I have of their masters",
+    "I'm going to personally see to it that Taylor Swift gets her masters back. Scooter is a close family friend",
+    "I'm the new Moses",
+    "Life is the ultimate gift",
+    "Ma$e is one of my favorite rappers and I based a lot of my flows off of him",
+    "Manga all day",
+    "My first pillar when I'm on the board of adidas will be an adidas Nike collaboration to support community growth",
+    "My mama was a' English teacher. I know how to use correct English but sometimes I just don't feel like it aaaand I ain't got to",
+    "My memories are from the future",
+    "My mother in law Kris Jenner ... makes the best music playlist",
+    "People say it's enough and I got my point across ... the point isn't across until we cross the point",
+    "People tried to talk me out of running for President. Never let weak controlling people kill your spirit",
+    "So many of us need so much less than we have especially when so many of us are in need",
+    "Speak truth to power",
+    "The media tries to kill our heroes one at a time",
+    "The world needs more Joy... this idea is super fresh",
+    "There are 5 main pillars in a professional musicians business - Recording, Publishing, Touring, Merchandise & Name and likeness",
+    "There are people sleeping in parking lots",
+    "There's a crying need for civility across the board. We need to and will come together in the name of Jesus.",
+    "There's so many lonely emojis man",
+    "Trust me ... I won't stop",
+    "Two years ago we had 50 million people subscribed to music streaming services around the world. Today we have 400 million.",
+    "We are here to complete the revolution. We are building the future",
+    "We as a people will heal. We will insure the well being of each other",
+    "We have to evolve",
+    "We must and will cure homelessness and hunger. We have the capability as a species",
+    "We must form a union. We must unify",
+    "We used to diss Michael Jackson the media made us call him crazy ... then they killed him",
+    "We will be recognized",
+    "We will change the paradigm",
+    "We will cure hunger",
+    "We will heal. We will cure.",
+    "We're going to move the entire music industry into the 21st Century",
+    "We've gotten comfortable with not having what we deserve",
+    "Who made up the term major label in the first place???",
+    "Winning is the only option",
+    "For me to say I wasn't a genius I'd just be lying to you and to myself",
+    "I've known my mom since I was zero years old. She is quite dope.",
+    "I don't expect to be understood at all.",
+    "I'm on the pursuit of awesomeness, excellence is the bare minimum.",
+    "You basically can say anything to someone on an email or text as long as you put LOL at the end."
+];
+
+function preload() {
+  img = loadImage('https://static.wixstatic.com/media/ea7ed1_d2a728bb91d947e29e7103d113091bc8~mv2.png');
+  sound = loadSound('https://static.wixstatic.com/mp3/ea7ed1_9cc8b0b587e84326aeb366d3850500e2.mp3');
+}
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  textFont('Courier');
+  playButton = {
+    x: windowWidth * 0.75,
+    y: windowHeight / 2,
+    size: min(windowWidth, windowHeight) * 0.1,
+    isPlay: true,
+    floatPhase: 0
+  };
+}
+
+function draw() {
+  background(0);
+  
+  // Contract Address Bar
+  let barWidth = min(width * 0.3, 200);
+  let barHeight = min(height * 0.05, 30);
+  let barY = barHeight / 2 + 10;
+  fill(255, 200);
+  noStroke();
+  rectMode(CENTER);
+  rect(width / 2, barY, barWidth, barHeight, 5);
+  fill(0);
+  textSize(min(width, height) * 0.03);
+  textAlign(CENTER, CENTER);
+  text("CA:", width / 2, barY);
+  
+  // Social Handle
+  fill(255, 200);
+  textSize(min(width, height) * 0.025);
+  text("𝕏: @YeOldKanye", width / 2, barY + barHeight + 10);
+  
+  // Scrolling text
+  let textOpacity = random(40, 80);
+  fill(255, textOpacity);
+  textSize(min(width, height) * 0.03);
+  let textX = (frameCount % (width + 400)) - 400;
+  text("I miss the old Kanye", textX, height * 0.9);
+  
+  // Soundwaves
+  noFill();
+  stroke(255);
+  strokeWeight(2);
+  let maxRadius = sqrt(sq(width / 2) + sq(height / 2)) * 0.9;
+  let waveScale = (sin(frameCount * 0.01) + 1) * maxRadius / 2;
+  for (let r = waveScale; r > 0; r -= 20) {
+    let angleOffset = (r / maxRadius) * TWO_PI * clickCount;
+    beginShape();
+    for (let a = 0; a < TWO_PI; a += 0.1) {
+      let x = width / 2 + (r + sin(a * 5 + frameCount * 0.02) * 10) * cos(a + angleOffset);
+      let y = height / 2 + (r + sin(a * 5 + frameCount * 0.02) * 10) * sin(a + angleOffset);
+      vertex(x, y);
+    }
+    endShape(CLOSE);
+  }
+  
+  // Mandalas
+  if (frameCount % 120 === 0) {
+    mandalas.push({
+      radius: maxRadius * 0.5,
+      scale: 0,
+      startFrame: frameCount
+    });
+  }
+  for (let i = mandalas.length - 1; i >= 0; i--) {
+    let m = mandalas[i];
+    let t = (frameCount - m.startFrame) * 0.01;
+    m.scale = (sin(t) + 1) / 2;
+    if (t > TWO_PI) {
+      mandalas.splice(i, 1);
+      continue;
+    }
+    push();
+    translate(width / 2, height / 2);
+    rotate(frameCount * 0.005);
+    stroke(255, 150);
+    noFill();
+    let mandalaRadius = m.radius * m.scale;
+    beginShape();
+    for (let a = 0; a < TWO_PI; a += 0.1) {
+      let r = mandalaRadius + sin(a * 8) * 10;
+      let x = r * cos(a);
+      let y = r * sin(a);
+      vertex(x, y);
+    }
+    endShape(CLOSE);
+    pop();
+  }
+  
+  // Pulsating image
+  push();
+  translate(width / 2, height / 2);
+  imgAngle = -frameCount * 0.01;
+  rotate(imgAngle);
+  let offsetX = 0, offsetY = 0;
+  if (animationType === 'rattle') {
+    offsetX = sin(frameCount * 0.1) * 3;
+    offsetY = cos(frameCount * 0.1) * 3;
+  } else if (animationType === 'earthquake') {
+    offsetX = sin(frameCount * 0.05) * 6;
+    offsetY = cos(frameCount * 0.05) * 6;
+  }
+  translate(offsetX, offsetY);
+  imageMode(CENTER);
+  imgScale = 1 + 0.7 * sin(frameCount * 0.02);
+  imgSize = 50 + min(width, height) * 0.3 * imgScale;
+  image(img, 0, 0, imgSize, imgSize);
+  pop();
+  
+  if (frameCount % 300 === 0) {
+    targetAnimationType = random(['normal', 'rattle', 'earthquake']);
+  }
+  if (animationType !== targetAnimationType) {
+    animationTransition += 0.05;
+    if (animationTransition >= 1) {
+      animationType = targetAnimationType;
+      animationTransition = 0;
+    }
+  }
+  
+  // Quotes
+  if (millis() - lastQuoteTime > 5000 && playButton) {
+    let attempts = 0;
+    let newX, newY;
+    let safeDistance = playButton.size * 2;
+    let topSafeY = barHeight * 2 + 20;
+    let bottomSafeY = height * 0.85;
+    do {
+      newX = random(width * 0.2, width * 0.8);
+      newY = random(topSafeY, bottomSafeY);
+      attempts++;
+    } while (attempts < 20 && (
+      dist(newX, newY, playButton.x, playButton.y + sin(playButton.floatPhase) * 20) < safeDistance ||
+      newY < topSafeY ||
+      newY > bottomSafeY
+    ));
+    if (attempts < 20) {
+      displayedQuotes.push({
+        text: random(quotes),
+        x: newX,
+        y: newY,
+        size: min(width, height) * random(0.02, 0.04),
+        opacity: 0,
+        fadingIn: true
+      });
+      lastQuoteTime = millis();
+    } else {
+      console.warn('Could not find valid quote position after 20 attempts');
+    }
+  }
+  for (let i = displayedQuotes.length - 1; i >= 0; i--) {
+    let q = displayedQuotes[i];
+    if (q.fadingIn) {
+      q.opacity += 3;
+      if (q.opacity >= 255) q.fadingIn = false;
+    } else {
+      q.opacity -= 1;
+      if (q.opacity <= 0) {
+        displayedQuotes.splice(i, 1);
+        continue;
+      }
+    }
+    textSize(q.size);
+    textAlign(CENTER, CENTER);
+    textWrap(WORD);
+    let maxWidth = min(width * 0.6, 400);
+    let textH = textAscent() * 1.5;
+    let lines = q.text.split('\n').length;
+    if (textWidth(q.text) > maxWidth) {
+      lines = Math.ceil(textWidth(q.text) / maxWidth) + 1;
+    }
+    let rectH = textH * lines + 20;
+    let rectW = maxWidth + 20;
+    rectMode(CENTER);
+    fill(255, 255, 255, q.opacity * 0.75); // 75% opacity for box
+    noStroke();
+    rect(q.x, q.y, rectW, rectH, 10);
+    stroke(255, q.opacity);
+    strokeWeight(2);
+    drawingContext.setLineDash([5, 5]);
+    noFill();
+    rect(q.x, q.y, rectW, rectH, 10);
+    drawingContext.setLineDash([]);
+    fill(0, q.opacity);
+    noStroke();
+    text(q.text, q.x, q.y, maxWidth);
+  }
+  
+  // Play/Pause button
+  if (playButton) {
+    playButton.floatPhase += 0.01;
+    let floatOffset = sin(playButton.floatPhase) * 20;
+    push();
+    translate(playButton.x, playButton.y + floatOffset);
+    fill(255, 200);
+    noStroke();
+    if (playButton.isPlay) {
+      triangle(-playButton.size / 2, -playButton.size / 2, -playButton.size / 2, playButton.size / 2, playButton.size / 2, 0);
+    } else {
+      rect(-playButton.size / 2, -playButton.size / 2, playButton.size / 3, playButton.size);
+      rect(playButton.size / 6, -playButton.size / 2, playButton.size / 3, playButton.size);
+    }
+    pop();
+  } else {
+    console.error('playButton is undefined');
+  }
+}
+
+function mousePressed() {
+  clickCount++;
+  if (playButton && dist(mouseX, mouseY, playButton.x, playButton.y + sin(playButton.floatPhase) * 20) < playButton.size) {
+    if (isPlaying) {
+      sound.pause();
+      playButton.isPlay = true;
+      isPlaying = false;
+    } else {
+      sound.loop();
+      playButton.isPlay = false;
+      isPlaying = true;
+    }
+  }
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  if (playButton) {
+    playButton.x = windowWidth * 0.75;
+    playButton.y = windowHeight / 2;
+    playButton.size = min(windowWidth, windowHeight) * 0.1;
+  }
+}
+</script>
+</body>
+</html>
