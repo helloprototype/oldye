@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kanye West Soundwave Animation</title>
+  <title>I Miss the Old Kanye</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/addons/p5.sound.min.js"></script>
   <style>
@@ -163,7 +163,8 @@ const quotes = [
 
 function preload() {
   img = loadImage('https://static.wixstatic.com/media/ea7ed1_d2a728bb91d947e29e7103d113091bc8~mv2.png');
-  sound = loadSound('https://static.wixstatic.com/mp3/ea7ed1_9cc8b0b587e84326aeb366d3850500e2.mp3');
+  sound = loadSound('https://static.wixstatic.com/mp3/ea7ed1_9cc8b0b587e84326aeb366d3850500e2.mp3', () => console.log('Audio loaded'), () => console.error('Audio failed to load'));
+  sound.setVolume(0.5);
 }
 
 function setup() {
@@ -181,7 +182,6 @@ function setup() {
 function draw() {
   background(0);
   
-  // Contract Address Bar
   let barWidth = min(width * 0.3, 200);
   let barHeight = min(height * 0.05, 30);
   let barY = barHeight / 2 + 10;
@@ -194,19 +194,16 @@ function draw() {
   textAlign(CENTER, CENTER);
   text("CA:", width / 2, barY);
   
-  // Social Handle
   fill(255, 200);
   textSize(min(width, height) * 0.025);
   text("𝕏: @YeOldKanye", width / 2, barY + barHeight + 10);
   
-  // Scrolling text
   let textOpacity = random(40, 80);
   fill(255, textOpacity);
   textSize(min(width, height) * 0.03);
   let textX = (frameCount % (width + 400)) - 400;
   text("I miss the old Kanye", textX, height * 0.9);
   
-  // Soundwaves
   noFill();
   stroke(255);
   strokeWeight(2);
@@ -223,7 +220,6 @@ function draw() {
     endShape(CLOSE);
   }
   
-  // Mandalas
   if (frameCount % 120 === 0) {
     mandalas.push({
       radius: maxRadius * 0.5,
@@ -256,7 +252,6 @@ function draw() {
     pop();
   }
   
-  // Pulsating image
   push();
   translate(width / 2, height / 2);
   imgAngle = -frameCount * 0.01;
@@ -287,7 +282,6 @@ function draw() {
     }
   }
   
-  // Quotes
   if (millis() - lastQuoteTime > 5000 && playButton) {
     let attempts = 0;
     let newX, newY;
@@ -341,7 +335,7 @@ function draw() {
     let rectH = textH * lines + 20;
     let rectW = maxWidth + 20;
     rectMode(CENTER);
-    fill(255, 255, 255, q.opacity * 0.75); // 75% opacity for box
+    fill(255, 255, 255, q.opacity * 0.75);
     noStroke();
     rect(q.x, q.y, rectW, rectH, 10);
     stroke(255, q.opacity);
@@ -355,7 +349,6 @@ function draw() {
     text(q.text, q.x, q.y, maxWidth);
   }
   
-  // Play/Pause button
   if (playButton) {
     playButton.floatPhase += 0.01;
     let floatOffset = sin(playButton.floatPhase) * 20;
@@ -375,19 +368,32 @@ function draw() {
   }
 }
 
+function handlePlayPause() {
+  userStartAudio().then(() => {
+    if (playButton && dist(mouseX, mouseY, playButton.x, playButton.y + sin(playButton.floatPhase) * 20) < playButton.size) {
+      if (isPlaying) {
+        sound.pause();
+        playButton.isPlay = true;
+        isPlaying = false;
+        console.log('Audio paused');
+      } else {
+        sound.loop();
+        playButton.isPlay = false;
+        isPlaying = true;
+        console.log('Audio playing');
+      }
+    }
+  });
+}
+
 function mousePressed() {
   clickCount++;
-  if (playButton && dist(mouseX, mouseY, playButton.x, playButton.y + sin(playButton.floatPhase) * 20) < playButton.size) {
-    if (isPlaying) {
-      sound.pause();
-      playButton.isPlay = true;
-      isPlaying = false;
-    } else {
-      sound.loop();
-      playButton.isPlay = false;
-      isPlaying = true;
-    }
-  }
+  handlePlayPause();
+}
+
+function touchStarted() {
+  handlePlayPause();
+  return false;
 }
 
 function windowResized() {
